@@ -480,12 +480,13 @@ export default function CsvValidator({
       protein = matchedFood.protein;
     }
 
-    // Step 4: Category-level substitution (Imputation) if Potassium or Phosphorus are missing/null/0
+    // Step 4: Category-level substitution (Imputation) if Potassium, Phosphorus, or Calcium are missing/null/0
     const needsKImputation = matchedFood && (potassium === 0 || potassium === null || potassium === undefined);
     const needsPImputation = matchedFood && (phosphorus === 0 || phosphorus === null || phosphorus === undefined);
+    const needsCaImputation = matchedFood && (calcium === 0 || calcium === null || calcium === undefined);
     const notFoundAtAll = !matchedFood;
 
-    if (needsKImputation || needsPImputation || notFoundAtAll) {
+    if (needsKImputation || needsPImputation || needsCaImputation || notFoundAtAll) {
       // Let's identify the generic category item
       const nameToCheck = rawIngredientName;
       let categoryMatch: CsvRow | undefined = undefined;
@@ -581,6 +582,11 @@ export default function CsvValidator({
             isPImputed = true;
             imputationNotes.push(`인 수치 결손으로 인해 '${categoryNameUsed}' 인 기준치(${phosphorus}mg) 대체 대입`);
           }
+          if (needsCaImputation) {
+            calcium = categoryMatch.calcium;
+            isCaImputed = true;
+            imputationNotes.push(`칼슘 수치 결손으로 인해 '${categoryNameUsed}' 칼슘 기준치(${calcium}mg) 대체 대입`);
+          }
         }
       }
     }
@@ -608,6 +614,13 @@ export default function CsvValidator({
         isPImputed = true;
         imputationNotes.push(`인 및 단백질 결손으로 인해 '가공식품 평균 인산염 수치(70mg/100g)' 강제 주입`);
       }
+    }
+
+    if (calcium === 0 || calcium === null || calcium === undefined) {
+      calcium = 30;
+      isCaImputed = true;
+      dataSource = dataSource === 'none' ? 'safety' : dataSource;
+      imputationNotes.push(`칼슘 결손 및 대체불가로 인해 '가공식품 평균 최소 칼슘(30mg/100g)' 주입`);
     }
 
     // Calculate final actual values scaled by weight
@@ -1382,6 +1395,14 @@ export default function CsvValidator({
                           <span className="font-mono text-slate-400">{report.originalP}mg</span>
                         </div>
 
+                        {/* Calcium comparative */}
+                        <div className="px-2 py-1 rounded-md text-[10px] font-semibold border bg-slate-50 border-slate-200 text-slate-700 flex items-center gap-1.5">
+                          <span>Ca(칼슘):</span>
+                          <span className="font-mono font-bold">{report.calculatedCa}</span>
+                          <span className="text-slate-300">/</span>
+                          <span className="font-mono text-slate-400">{report.originalCa}mg</span>
+                        </div>
+
                         {/* Status pill */}
                         {report.status === 'perfect' && (
                           <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold">✓ 일치</span>
@@ -1511,7 +1532,9 @@ export default function CsvValidator({
                                     </div>
                                     <div>
                                       <div className="text-slate-400 text-[9px]">Ca</div>
-                                      <div className="font-extrabold text-amber-600">{ing.calculatedCalcium}</div>
+                                      <div className={`font-extrabold ${ing.isCaImputed ? 'text-purple-600 underline decoration-dashed' : 'text-amber-600'}`}>
+                                        {ing.calculatedCalcium}
+                                      </div>
                                     </div>
                                     <div>
                                       <div className="text-slate-400 text-[9px]">Pro</div>
@@ -1540,6 +1563,12 @@ export default function CsvValidator({
                                 <span className="text-slate-500">인: </span>
                                 <span className={Math.abs(report.calculatedP - report.originalP) > 50 ? 'text-pink-600 font-black' : 'text-slate-800'}>
                                   {report.calculatedP}mg (오차: {Math.round(report.calculatedP - report.originalP)}mg)
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-slate-500">칼슘: </span>
+                                <span className={Math.abs(report.calculatedCa - report.originalCa) > 30 ? 'text-amber-600 font-black' : 'text-slate-800'}>
+                                  {report.calculatedCa}mg (오차: {Math.round(report.calculatedCa - report.originalCa)}mg)
                                 </span>
                               </div>
                               <div>
