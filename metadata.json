@@ -1,0 +1,8 @@
+{
+  "name": "온의원 인공신장실 식단 자동화_ver0706",
+  "description": "A clinical nutrition and meal planning dashboard for kidney care, featuring laboratory indicator monitoring, interactive diet planning, and renal-safe recipes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
