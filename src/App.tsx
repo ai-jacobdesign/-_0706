@@ -159,8 +159,48 @@ export function adjustMealDescription(
 export function getAdjustedMealPlan(
   potassium: number,
   phosphorus: number,
-  calcium: number
+  calcium: number,
+  patientName: string = '',
+  patientId: string = ''
 ): DailyMealPlan[] {
+  // Simple seed based on patient name and ID
+  const seedString = `${patientName}-${patientId}`;
+  let seed = 0;
+  for (let i = 0; i < seedString.length; i++) {
+    seed = (seed << 5) - seed + seedString.charCodeAt(i);
+    seed |= 0;
+  }
+  
+  // Create a copy of the template and shuffle it based on the seed
+  // We want to keep the day names (Mon-Sun) and weeks (1-4) structural, 
+  // just shuffle the actual meal contents across the 28 days
+  const baseMeals = [...FOUR_WEEK_MEAL_PLAN_TEMPLATE];
+  
+  const random = () => {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  };
+  
+  for (let i = baseMeals.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    // Swap everything except week, dayIndex, dayName
+    const temp = { ...baseMeals[i] };
+    
+    baseMeals[i].mealName = baseMeals[j].mealName;
+    baseMeals[i].mealDescription = baseMeals[j].mealDescription;
+    baseMeals[i].category = baseMeals[j].category;
+    baseMeals[i].potassiumMg = baseMeals[j].potassiumMg;
+    baseMeals[i].phosphorusMg = baseMeals[j].phosphorusMg;
+    baseMeals[i].calciumMg = baseMeals[j].calciumMg;
+    
+    baseMeals[j].mealName = temp.mealName;
+    baseMeals[j].mealDescription = temp.mealDescription;
+    baseMeals[j].category = temp.category;
+    baseMeals[j].potassiumMg = temp.potassiumMg;
+    baseMeals[j].phosphorusMg = temp.phosphorusMg;
+    baseMeals[j].calciumMg = temp.calciumMg;
+  }
+
   // Continuous reduction factor based on where they stand relative to the target's starting point
   const factor_k = potassium > 3.5 ? Math.max(0.4, 1.0 - 0.15 * (potassium - 3.5)) : 1.0;
   const factor_p = phosphorus > 2.5 ? Math.max(0.4, 1.0 - 0.13 * (phosphorus - 2.5)) : 1.0;
@@ -172,7 +212,7 @@ export function getAdjustedMealPlan(
   const l_ca = 60 * factor_ca;
 
   // 2. Compute first-pass meal scaling factors to satisfy meal-level limits
-  const mealAdjusted = FOUR_WEEK_MEAL_PLAN_TEMPLATE.map(meal => {
+  const mealAdjusted = baseMeals.map(meal => {
     let f_k = factor_k;
     if (meal.potassiumMg * f_k > l_k) {
       f_k = l_k / meal.potassiumMg;
@@ -474,8 +514,8 @@ export default function App() {
 
   // Dynamically calculate adjusted meal plans based on current patient lab values
   const adjustedMealPlan = React.useMemo(() => {
-    return getAdjustedMealPlan(potassium, phosphorus, calcium);
-  }, [potassium, phosphorus, calcium]);
+    return getAdjustedMealPlan(potassium, phosphorus, calcium, patientName, patientId);
+  }, [potassium, phosphorus, calcium, patientName, patientId]);
 
   // 4-Week Custom-highlighted Meal Selection
   const filteredMeals = adjustedMealPlan.filter(m => m.week === activeWeek);
@@ -644,7 +684,7 @@ export default function App() {
                     <input 
                       type="range"
                       min="1.5"
-                      max="8.5"
+                      max="13.0"
                       step="0.1"
                       className="grow accent-orange-600"
                       value={phosphorus}
@@ -654,10 +694,10 @@ export default function App() {
                       type="number"
                       step="0.1"
                       min="1.5"
-                      max="8.5"
+                      max="13.0"
                       className="w-16 text-center py-1 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold focus:outline-hidden"
                       value={phosphorus}
-                      onChange={(e) => setPhosphorus(Math.max(1.5, Math.min(8.5, parseFloat(e.target.value) || 3.5)))}
+                      onChange={(e) => setPhosphorus(Math.max(1.5, Math.min(13.0, parseFloat(e.target.value) || 3.5)))}
                     />
                   </div>
                   <div className={`mt-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium border flex items-center gap-1.5 ${pStatus.color}`}>
@@ -774,7 +814,7 @@ export default function App() {
                           <span className="text-xs font-semibold text-slate-500">인 수치 이력 대조 (단위: mg/dL)</span>
                           <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-sm">목표: 2.5 ~ 5.5</span>
                         </div>
-                        {drawTrendLine('phosphorus', '#ec4899', 1.5, 8.5)}
+                        {drawTrendLine('phosphorus', '#ec4899', 1.5, 13.0)}
                       </div>
                     )}
                     {activeTab === 'ca' && (
@@ -1056,69 +1096,69 @@ export default function App() {
         <div 
           id="printable-export-container" 
           ref={exportAreaRef} 
-          className="bg-slate-50 p-8 w-[1200px] border border-slate-300 rounded-xl flex flex-col gap-6"
+          className="bg-slate-50 p-6 w-[1200px] min-h-[1697px] max-h-[1697px] border border-slate-300 rounded-xl flex flex-col justify-between"
         >
           {/* Export Header */}
-          <div className="bg-white border-2 border-orange-500 rounded-2xl p-6 shadow-sm flex justify-between items-center">
+          <div className="bg-white border-2 border-orange-500 rounded-2xl p-5 shadow-sm flex justify-between items-center">
             <div className="flex items-center gap-4">
               <OnLogo className="w-16 h-16 flex-shrink-0" />
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xs bg-orange-600 text-white font-extrabold px-2.5 py-0.5 rounded-sm uppercase tracking-wide">
+                  <span className="text-[14px] bg-orange-600 text-white font-extrabold px-3 py-1 rounded-sm uppercase tracking-wide">
                     Clinical Dialysis Diet
                   </span>
-                  <span className="text-xs text-slate-500 font-bold font-mono">ON Renal Care Center</span>
+                  <span className="text-[14px] text-slate-500 font-bold font-mono">ON Renal Care Center</span>
                 </div>
-                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-[28px] font-extrabold text-slate-900 tracking-tight">
                   온의원 인공신장실 맞춤형 투석 환자 4주 건강 식단표
                 </h1>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-[14px] text-slate-500 mt-1">
                   본 식단은 투석 환자의 혈액검사 전해질 지표(칼륨, 인, 칼슘) 상태를 반영하여 영양사가 구성한 안심 식단 가이드라인입니다.
                 </p>
               </div>
             </div>
             
             {/* Patient Badge */}
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-right flex flex-col gap-1 min-w-[240px]">
-              <div className="text-xs text-slate-500 font-bold">환자 정보 (Patient Info)</div>
-              <div className="text-base font-extrabold text-slate-900">
+            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-right flex flex-col gap-1 min-w-[260px]">
+              <div className="text-[14px] text-slate-500 font-bold">환자 정보 (Patient Info)</div>
+              <div className="text-[18px] font-extrabold text-slate-900">
                 {patientName || '미지정'} 환자님
               </div>
-              <div className="text-xs font-mono text-slate-400">
+              <div className="text-[14px] font-mono text-slate-400">
                 환자번호: {patientId || '0000'} | 발행일: {new Date().toLocaleDateString('ko-KR')}
               </div>
             </div>
           </div>
 
           {/* Current Labs Indicator Row */}
-          <div className="grid grid-cols-3 gap-4 bg-white p-5 border border-slate-200 rounded-2xl shadow-xs text-center">
-            <div className={`p-3 rounded-xl border ${kStatus.color}`}>
-              <div className="text-xs font-bold text-slate-500">측정 칼륨 (K)</div>
-              <div className="text-xl font-extrabold font-mono mt-1">{potassium} mEq/L</div>
-              <div className="text-[10px] mt-1 font-semibold opacity-90">{kStatus.text}</div>
+          <div className="grid grid-cols-3 gap-3 bg-white p-3 border border-slate-200 rounded-2xl shadow-xs text-center">
+            <div className={`p-2.5 rounded-xl border ${kStatus.color}`}>
+              <div className="text-[14px] font-bold text-slate-500">측정 칼륨 (K)</div>
+              <div className="text-[22px] font-extrabold font-mono mt-1">{potassium} mEq/L</div>
+              <div className="text-[12.5px] mt-1 font-semibold opacity-90">{kStatus.text}</div>
             </div>
-            <div className={`p-3 rounded-xl border ${pStatus.color}`}>
-              <div className="text-xs font-bold text-slate-500">측정 인 (P)</div>
-              <div className="text-xl font-extrabold font-mono mt-1">{phosphorus} mg/dL</div>
-              <div className="text-[10px] mt-1 font-semibold opacity-90">{pStatus.text}</div>
+            <div className={`p-2.5 rounded-xl border ${pStatus.color}`}>
+              <div className="text-[14px] font-bold text-slate-500">측정 인 (P)</div>
+              <div className="text-[22px] font-extrabold font-mono mt-1">{phosphorus} mg/dL</div>
+              <div className="text-[12.5px] mt-1 font-semibold opacity-90">{pStatus.text}</div>
             </div>
-            <div className={`p-3 rounded-xl border ${caStatus.color}`}>
-              <div className="text-xs font-bold text-slate-500">측정 칼슘 (Ca)</div>
-              <div className="text-xl font-extrabold font-mono mt-1">{calcium} mg/dL</div>
-              <div className="text-[10px] mt-1 font-semibold opacity-90">{caStatus.text}</div>
+            <div className={`p-2.5 rounded-xl border ${caStatus.color}`}>
+              <div className="text-[14px] font-bold text-slate-500">측정 칼슘 (Ca)</div>
+              <div className="text-[22px] font-extrabold font-mono mt-1">{calcium} mg/dL</div>
+              <div className="text-[12.5px] mt-1 font-semibold opacity-90">{caStatus.text}</div>
             </div>
           </div>
 
           {/* Clinical Directives */}
-          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-4 text-xs">
-            <h4 className="font-bold text-slate-950 flex items-center gap-1.5 mb-1">
+          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3 text-[14px]">
+            <h4 className="font-bold text-slate-950 flex items-center gap-1.5 mb-1 text-[16px]">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
               송현철 대표원장 정밀 식사조리 지시사항 (Essential Guidelines)
             </h4>
             <div className="space-y-1 text-slate-800 leading-relaxed font-medium">
               <div>• <strong>저칼륨 수칙:</strong> 채소는 얇게 채썰어 뜨거운 물에 20분 이상 데쳐 물은 버리고 섭취. 모든 과일은 껍질과 씨를 제거하고 소량만.</div>
               <div>• <strong>저인 수칙:</strong> 가공 소스 및 보존제 인산염이 든 인스턴트 가공식품, 가공치즈, 유제품 등 절대 금지. 식사 때 인결합제를 처방대로 반드시 복용.</div>
-              <div>• <strong>단백질 밸런스:</strong> 과다한 적색육 대신 계란 흰자, 닭안심, 대구 등 담백한 흰살생선으로 필요 단백질을 안전하게 조충할 것.</div>
+              <div>• <strong>단백질 밸런스:</strong> 과다한 적색육 대신 계란 흰자, 닭안심, 대구 등 담백한 흰살생선으로 필요 단백질을 안전하게 보충할 것.</div>
             </div>
           </div>
 
@@ -1126,36 +1166,46 @@ export default function App() {
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             {[1, 2, 3, 4].map((wk) => {
               const weekMeals = adjustedMealPlan.filter(m => m.week === wk);
+              
+              const weekThemes = {
+                1: { headerBg: 'bg-blue-100', headerText: 'text-blue-900', border: 'border-blue-200', dayHeaderBg: 'bg-blue-50/80', dayBorder: 'border-blue-100', dayText: 'text-blue-950' },
+                2: { headerBg: 'bg-emerald-100', headerText: 'text-emerald-900', border: 'border-emerald-200', dayHeaderBg: 'bg-emerald-50/80', dayBorder: 'border-emerald-100', dayText: 'text-emerald-950' },
+                3: { headerBg: 'bg-purple-100', headerText: 'text-purple-900', border: 'border-purple-200', dayHeaderBg: 'bg-purple-50/80', dayBorder: 'border-purple-100', dayText: 'text-purple-950' },
+                4: { headerBg: 'bg-orange-100', headerText: 'text-orange-900', border: 'border-orange-200', dayHeaderBg: 'bg-orange-50/80', dayBorder: 'border-orange-100', dayText: 'text-orange-950' },
+              } as const;
+              
+              const theme = weekThemes[wk as keyof typeof weekThemes];
+
               return (
-                <div key={wk} className="border-b last:border-b-0 border-slate-200">
-                  <div className="bg-slate-100 px-4 py-2 font-extrabold text-sm text-slate-800 border-b border-slate-200 flex items-center justify-between">
+                <div key={wk} className={`border-b last:border-b-0 ${theme.border}`}>
+                  <div className={`${theme.headerBg} px-4 py-1.5 font-extrabold text-[17.5px] ${theme.headerText} border-b ${theme.border} flex items-center justify-between`}>
                     <span>{wk}주차 맞춤 식단 (Week {wk} Menu Plan)</span>
-                    <span className="text-xs text-slate-500 font-normal">월요일 ~ 일요일 전체 플랜</span>
+                    <span className="text-[15px] opacity-75 font-normal">월요일 ~ 일요일 전체 플랜</span>
                   </div>
                   <div className="grid grid-cols-7 divide-x divide-slate-200 bg-white">
                     {weekMeals.map((day) => {
                       const cleanMealName = day.mealName.replace(/\s*식단$/, '');
                       const showWarning = potassium > 5.5 || phosphorus > 5.5;
                       return (
-                        <div key={day.dayIndex} className="p-3 text-[11px] leading-normal flex flex-col justify-between min-h-[225px] bg-white">
+                        <div key={day.dayIndex} className="p-2.5 text-[14px] leading-normal flex flex-col justify-between min-h-[210px] bg-white">
                           <div>
-                            <div className="font-extrabold text-slate-900 border-b border-orange-100 pb-1 mb-2 text-center text-xs bg-orange-50/70 py-1 rounded-sm">
+                            <div className={`font-extrabold ${theme.dayText} border-b ${theme.dayBorder} pb-1 mb-1.5 text-center text-[15px] ${theme.dayHeaderBg} py-1 rounded-sm`}>
                               {day.dayName}
                             </div>
                             
-                            <div className="space-y-1.5">
+                            <div className="space-y-1">
                               {/* Category Small Label */}
-                              <div className="inline-block whitespace-nowrap text-[9px] font-extrabold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                              <div className="inline-block whitespace-nowrap text-[11px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                                 {day.category === 'bulgogi' ? '🥩 소고기' :
                                  day.category === 'fish' ? '🐟 생선류' :
                                  day.category === 'tofu' ? '🌱 두부류' :
                                  day.category === 'chicken' ? '🐔 닭고기' :
                                  day.category === 'pork' ? '🐖 돼지고기' : '🥗 채식/기타'}
                               </div>
-                              <div className="font-extrabold text-slate-950 text-[12px] leading-tight tracking-tight">
+                              <div className="font-extrabold text-slate-950 text-[15px] leading-tight tracking-tight mt-1">
                                 {cleanMealName}
                               </div>
-                              <div className="text-[10px] text-slate-900 leading-normal font-semibold bg-slate-50/85 p-2 rounded-md border border-slate-100">
+                              <div className="text-[12.5px] text-slate-900 leading-normal font-semibold bg-slate-50/85 p-1.5 mt-1 rounded-md border border-slate-100">
                                 {day.mealDescription}
                               </div>
                             </div>
@@ -1163,7 +1213,7 @@ export default function App() {
 
                           {/* Warn badges inside printable table (only when warning exists, no success badges) */}
                           {showWarning && (
-                            <div className="mt-2 text-[8px] font-bold text-center">
+                            <div className="mt-1.5 text-[10px] font-bold text-center">
                               {potassium > 5.5 ? (
                                 <span className="text-rose-600 bg-rose-50 px-1 py-0.5 rounded-xs block">K 경고: 데친채소</span>
                               ) : phosphorus > 5.5 ? (
@@ -1181,14 +1231,9 @@ export default function App() {
           </div>
 
           {/* Export Footer */}
-          <div className="text-[10px] text-slate-400 font-semibold border-t border-slate-200 pt-4 flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <span>본 식단표는 온의원 인공신장실 의료 자문을 통해 발행되었습니다.</span>
-              <span>원장 송현철 전문의 (직인 생략)</span>
-            </div>
-            <div className="text-left text-slate-500 font-medium">
-              본 식단표는 대한신장학회의 '만성콩팥병 환자를 위한 식품교환표'와 영양학적 근거를 바탕으로 제공됩니다.
-            </div>
+          <div className="text-[14px] text-slate-400 font-semibold border-t border-slate-200 pt-3 pb-1 flex justify-between items-center">
+            <span className="text-[15px]">본 식단표는 대한신장학회 지침 및 온의원 인공신장실 의료 자문을 바탕으로 발행되었습니다.</span>
+            <span className="text-[15px]">원장 송현철 전문의 (직인 생략)</span>
           </div>
         </div>
       </div>
