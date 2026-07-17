@@ -1096,66 +1096,66 @@ export default function App() {
         <div 
           id="printable-export-container" 
           ref={exportAreaRef} 
-          className="bg-slate-50 p-6 w-[1200px] min-h-[1697px] max-h-[1697px] border border-slate-300 rounded-xl flex flex-col justify-between"
+          className="bg-slate-50 p-4.5 w-[1200px] min-h-[1697px] max-h-[1697px] border border-slate-300 rounded-xl flex flex-col justify-between"
         >
           {/* Export Header */}
-          <div className="bg-white border-2 border-orange-500 rounded-2xl p-5 shadow-sm flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <OnLogo className="w-16 h-16 flex-shrink-0" />
+          <div className="bg-white border-2 border-orange-500 rounded-xl p-3.5 shadow-sm flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <OnLogo className="w-14 h-14 flex-shrink-0" />
               <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[14px] bg-orange-600 text-white font-extrabold px-3 py-1 rounded-sm uppercase tracking-wide">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-[12px] bg-orange-600 text-white font-extrabold px-2.5 py-0.5 rounded-sm uppercase tracking-wide">
                     Clinical Dialysis Diet
                   </span>
-                  <span className="text-[14px] text-slate-500 font-bold font-mono">ON Renal Care Center</span>
+                  <span className="text-[12px] text-slate-500 font-bold font-mono">ON Renal Care Center</span>
                 </div>
-                <h1 className="text-[28px] font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-[23px] font-extrabold text-slate-900 tracking-tight">
                   온의원 인공신장실 맞춤형 투석 환자 4주 건강 식단표
                 </h1>
-                <p className="text-[14px] text-slate-500 mt-1">
+                <p className="text-[12.5px] text-slate-500 mt-0.5">
                   본 식단은 투석 환자의 혈액검사 전해질 지표(칼륨, 인, 칼슘) 상태를 반영하여 영양사가 구성한 안심 식단 가이드라인입니다.
                 </p>
               </div>
             </div>
             
             {/* Patient Badge */}
-            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-right flex flex-col gap-1 min-w-[260px]">
-              <div className="text-[14px] text-slate-500 font-bold">환자 정보 (Patient Info)</div>
-              <div className="text-[18px] font-extrabold text-slate-900">
+            <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-right flex flex-col gap-0.5 min-w-[240px]">
+              <div className="text-[12px] text-slate-500 font-bold">환자 정보 (Patient Info)</div>
+              <div className="text-[16px] font-extrabold text-slate-900">
                 {patientName || '미지정'} 환자님
               </div>
-              <div className="text-[14px] font-mono text-slate-400">
+              <div className="text-[12px] font-mono text-slate-400">
                 환자번호: {patientId || '0000'} | 발행일: {new Date().toLocaleDateString('ko-KR')}
               </div>
             </div>
           </div>
 
           {/* Current Labs Indicator Row */}
-          <div className="grid grid-cols-3 gap-3 bg-white p-3 border border-slate-200 rounded-2xl shadow-xs text-center">
-            <div className={`p-2.5 rounded-xl border ${kStatus.color}`}>
-              <div className="text-[14px] font-bold text-slate-500">측정 칼륨 (K)</div>
-              <div className="text-[22px] font-extrabold font-mono mt-1">{potassium} mEq/L</div>
-              <div className="text-[12.5px] mt-1 font-semibold opacity-90">{kStatus.text}</div>
+          <div className="grid grid-cols-3 gap-2.5 bg-white p-2 border border-slate-200 rounded-xl shadow-xs text-center">
+            <div className={`p-1.5 rounded-lg border ${kStatus.color}`}>
+              <div className="text-[12px] font-bold text-slate-500">측정 칼륨 (K)</div>
+              <div className="text-[18px] font-extrabold font-mono mt-0.5">{potassium} mEq/L</div>
+              <div className="text-[11px] mt-0.5 font-semibold opacity-90">{kStatus.text}</div>
             </div>
-            <div className={`p-2.5 rounded-xl border ${pStatus.color}`}>
-              <div className="text-[14px] font-bold text-slate-500">측정 인 (P)</div>
-              <div className="text-[22px] font-extrabold font-mono mt-1">{phosphorus} mg/dL</div>
-              <div className="text-[12.5px] mt-1 font-semibold opacity-90">{pStatus.text}</div>
+            <div className={`p-1.5 rounded-lg border ${pStatus.color}`}>
+              <div className="text-[12px] font-bold text-slate-500">측정 인 (P)</div>
+              <div className="text-[18px] font-extrabold font-mono mt-0.5">{phosphorus} mg/dL</div>
+              <div className="text-[11px] mt-0.5 font-semibold opacity-90">{pStatus.text}</div>
             </div>
-            <div className={`p-2.5 rounded-xl border ${caStatus.color}`}>
-              <div className="text-[14px] font-bold text-slate-500">측정 칼슘 (Ca)</div>
-              <div className="text-[22px] font-extrabold font-mono mt-1">{calcium} mg/dL</div>
-              <div className="text-[12.5px] mt-1 font-semibold opacity-90">{caStatus.text}</div>
+            <div className={`p-1.5 rounded-lg border ${caStatus.color}`}>
+              <div className="text-[12px] font-bold text-slate-500">측정 칼슘 (Ca)</div>
+              <div className="text-[18px] font-extrabold font-mono mt-0.5">{calcium} mg/dL</div>
+              <div className="text-[11px] mt-0.5 font-semibold opacity-90">{caStatus.text}</div>
             </div>
           </div>
 
           {/* Clinical Directives */}
-          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3 text-[14px]">
-            <h4 className="font-bold text-slate-950 flex items-center gap-1.5 mb-1 text-[16px]">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
+          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 text-[12.5px]">
+            <h4 className="font-bold text-slate-950 flex items-center gap-1.5 mb-1 text-[13.5px]">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
               송현철 대표원장 정밀 식사조리 지시사항 (Essential Guidelines)
             </h4>
-            <div className="space-y-1 text-slate-800 leading-relaxed font-medium">
+            <div className="space-y-0.5 text-slate-800 leading-snug font-medium">
               <div>• <strong>저칼륨 수칙:</strong> 채소는 얇게 채썰어 뜨거운 물에 20분 이상 데쳐 물은 버리고 섭취. 모든 과일은 껍질과 씨를 제거하고 소량만.</div>
               <div>• <strong>저인 수칙:</strong> 가공 소스 및 보존제 인산염이 든 인스턴트 가공식품, 가공치즈, 유제품 등 절대 금지. 식사 때 인결합제를 처방대로 반드시 복용.</div>
               <div>• <strong>단백질 밸런스:</strong> 과다한 적색육 대신 계란 흰자, 닭안심, 대구 등 담백한 흰살생선으로 필요 단백질을 안전하게 보충할 것.</div>
@@ -1163,7 +1163,7 @@ export default function App() {
           </div>
 
           {/* FULL 4-WEEK GRID SUMMARY TABLE */}
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             {[1, 2, 3, 4].map((wk) => {
               const weekMeals = adjustedMealPlan.filter(m => m.week === wk);
               
@@ -1178,34 +1178,34 @@ export default function App() {
 
               return (
                 <div key={wk} className={`border-b last:border-b-0 ${theme.border}`}>
-                  <div className={`${theme.headerBg} px-4 py-1.5 font-extrabold text-[17.5px] ${theme.headerText} border-b ${theme.border} flex items-center justify-between`}>
+                  <div className={`${theme.headerBg} px-3 py-1 font-extrabold text-[13.5px] ${theme.headerText} border-b ${theme.border} flex items-center justify-between`}>
                     <span>{wk}주차 맞춤 식단 (Week {wk} Menu Plan)</span>
-                    <span className="text-[15px] opacity-75 font-normal">월요일 ~ 일요일 전체 플랜</span>
+                    <span className="text-[11.5px] opacity-75 font-normal">월요일 ~ 일요일 전체 플랜</span>
                   </div>
                   <div className="grid grid-cols-7 divide-x divide-slate-200 bg-white">
                     {weekMeals.map((day) => {
                       const cleanMealName = day.mealName.replace(/\s*식단$/, '');
                       const showWarning = potassium > 5.5 || phosphorus > 5.5;
                       return (
-                        <div key={day.dayIndex} className="p-2.5 text-[14px] leading-normal flex flex-col justify-between min-h-[210px] bg-white">
+                        <div key={day.dayIndex} className="p-1.5 text-[12.5px] leading-snug flex flex-col justify-between min-h-[175px] bg-white">
                           <div>
-                            <div className={`font-extrabold ${theme.dayText} border-b ${theme.dayBorder} pb-1 mb-1.5 text-center text-[15px] ${theme.dayHeaderBg} py-1 rounded-sm`}>
+                            <div className={`font-extrabold ${theme.dayText} border-b ${theme.dayBorder} pb-0.5 mb-1 text-center text-[13px] ${theme.dayHeaderBg} py-0.5 rounded-sm`}>
                               {day.dayName}
                             </div>
                             
-                            <div className="space-y-1">
+                            <div className="space-y-0.5">
                               {/* Category Small Label */}
-                              <div className="inline-block whitespace-nowrap text-[11px] font-extrabold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              <div className="inline-block whitespace-nowrap text-[9.5px] font-extrabold text-slate-600 bg-slate-100 px-1.5 py-0 rounded border border-slate-200">
                                 {day.category === 'bulgogi' ? '🥩 소고기' :
                                  day.category === 'fish' ? '🐟 생선류' :
                                  day.category === 'tofu' ? '🌱 두부류' :
                                  day.category === 'chicken' ? '🐔 닭고기' :
                                  day.category === 'pork' ? '🐖 돼지고기' : '🥗 채식/기타'}
                               </div>
-                              <div className="font-extrabold text-slate-950 text-[15px] leading-tight tracking-tight mt-1">
+                              <div className="font-extrabold text-slate-950 text-[12.5px] leading-tight tracking-tight mt-0.5">
                                 {cleanMealName}
                               </div>
-                              <div className="text-[12.5px] text-slate-900 leading-normal font-semibold bg-slate-50/85 p-1.5 mt-1 rounded-md border border-slate-100">
+                              <div className="text-[11px] text-slate-900 leading-snug font-semibold bg-slate-50/85 p-1 mt-0.5 rounded-md border border-slate-100">
                                 {day.mealDescription}
                               </div>
                             </div>
@@ -1213,7 +1213,7 @@ export default function App() {
 
                           {/* Warn badges inside printable table (only when warning exists, no success badges) */}
                           {showWarning && (
-                            <div className="mt-1.5 text-[10px] font-bold text-center">
+                            <div className="mt-1 text-[9px] font-bold text-center">
                               {potassium > 5.5 ? (
                                 <span className="text-rose-600 bg-rose-50 px-1 py-0.5 rounded-xs block">K 경고: 데친채소</span>
                               ) : phosphorus > 5.5 ? (
@@ -1231,9 +1231,9 @@ export default function App() {
           </div>
 
           {/* Export Footer */}
-          <div className="text-[14px] text-slate-400 font-semibold border-t border-slate-200 pt-3 pb-1 flex justify-between items-center">
-            <span className="text-[15px]">본 식단표는 대한신장학회 지침 및 온의원 인공신장실 의료 자문을 바탕으로 발행되었습니다.</span>
-            <span className="text-[15px]">원장 송현철 전문의 (직인 생략)</span>
+          <div className="text-[12.5px] text-slate-400 font-semibold border-t border-slate-200 pt-2 flex justify-between items-center">
+            <span className="text-[13px]">본 식단표는 대한신장학회 지침 및 온의원 인공신장실 의료 자문을 바탕으로 구성된 안심 식단 가이드라인입니다.</span>
+            <span className="text-[13px]">원장 송현철 전문의 (직인 생략)</span>
           </div>
         </div>
       </div>
